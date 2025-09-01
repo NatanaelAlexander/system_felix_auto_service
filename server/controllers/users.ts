@@ -44,7 +44,6 @@ export const putUserCreate = async ({ email, password, rol_id, name }: TypeGetCr
         const passHash = bcrypt.hashSync(password.trim(), 10);
 
         const response = await createUser({ email, passHash, rol_id, name });
-        console.log("putUserCreate response", response);
 
         if (response.status === 200) {
             return { data: response.data, status: 200 };
