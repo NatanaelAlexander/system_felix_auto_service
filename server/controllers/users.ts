@@ -1,6 +1,6 @@
 
 import { searchUserAuth, createUser, findUserByEmail } from "../models/users";
-import { generateToken } from "../utils/token"
+import { generateToken, validateToken } from "../utils/token"
 import bcrypt from 'bcryptjs';
 
 interface TypeGetUserByEmail {
@@ -13,6 +13,11 @@ interface TypeGetCreateUser {
     password: string,
     rol_id: number,
     name: string
+}
+
+interface TypeVerifyUserAndToken {
+    token: string,
+    user_id: number
 }
 
 export const getUserForLogin = async ({ email, password }: TypeGetUserByEmail) => {
@@ -77,5 +82,31 @@ export const putUserCreate = async ({ email, password, rol_id, name }: TypeGetCr
 
     } catch (error) {
         return { message: 'Unknown error while fetching the user', status: 500 }
+    }
+}
+
+export const verifyUserAndtoken = async ({ token, user_id }: TypeVerifyUserAndToken) => {
+    try {
+
+        if (!token || token.trim() == '' || token == null || token == undefined)
+            return { message: 'Required fields missing: token', status: 400 }
+        if (!user_id || user_id == null || user_id == undefined)
+            return { message: 'Required fields missing: token', status: 400 }
+
+        /* Verificar si esta bien el token */
+        const verifyToken = await validateToken(token)
+        console.log(verifyToken.user_id, user_id)
+
+        /* buscar el payload del token y comprar user_id con el del token */
+
+        if (verifyToken.user_id != user_id) {
+            return { data: false, status: 400 }
+        }
+
+        /* Si todo esta bien, lo de abajo */
+        return { data: true, status: 200 };
+
+    } catch (error) {
+        return { message: 'Unknown error while verify User and token', status: 500 }
     }
 }
