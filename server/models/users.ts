@@ -29,7 +29,7 @@ export const searchUserAuth = async ({ email }: TypeSearchUser) => {
 
     } catch (error) {
         console.log("searchUserAuth error", error);
-        return { message: 'Error desconocido al buscar el usuario', status: 500 }
+        return { message: 'Unknown error while searching for the user', status: 500 }
     };
 }
 
@@ -66,6 +66,6 @@ export const findUserByEmail = async ({ email }: TypeGetUSerByEmail) => {
 
     } catch (error) {
         console.log("createUser error", error);
-        return { message: 'Error desconocido al buscar al crear usuario', status: 500 }
+        return { message: 'Unknown error while searching for the user', status: 500 }
     };
 }

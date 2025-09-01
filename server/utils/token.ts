@@ -21,7 +21,7 @@ export const generateToken = async ({ user_id, rol_id }: TypeGenerateToken) => {
 
     } catch (error) {
         console.log("generateToken error", error);
-        return { message: 'Error desconocido al generar el token', status: 500 }
+        return { message: 'Unknown error while generating the token', status: 500 }
     }
 }
 
@@ -32,6 +32,6 @@ export const validateToken = async (token: string) => {
         return payload // aquí estarán user_id, rol_id, iat, exp
     } catch (err) {
         console.error("Token inválido:", err)
-        return { message: 'Error desconocido al validar el token', status: 500 }
+        return { message: 'Unknown error while validating the token', status: 500 }
     }
 }

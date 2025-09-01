@@ -11,5 +11,5 @@ export default defineEventHandler(async (event) => {
 
         return createResponse({ user }, user.status);
 
-    } catch (error) { return createResponse({ message: 'Error con la solicitud' }, 500); }
+    } catch (error) { return createResponse({ message: 'Request error' }, 500); }
 })
