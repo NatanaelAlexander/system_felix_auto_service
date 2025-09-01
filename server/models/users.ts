@@ -2,7 +2,6 @@ import { tursoClient } from "../bd/index";
 
 interface TypeSearchUser {
     email: string;
-    password: string;
 }
 
 interface TypeCreateUser {
@@ -16,14 +15,14 @@ interface TypeGetUSerByEmail {
     email: string;
 }
 
-export const searchUserAuth = async ({ email, password }: TypeSearchUser) => {
+export const searchUserAuth = async ({ email }: TypeSearchUser) => {
     try {
 
         const users = await tursoClient.execute({
             sql: `SELECT * FROM users 
             JOIN roles ON users.rol_id = roles.id
-            WHERE email = ? AND password = ?`,
-            args: [email, password]
+            WHERE email = ?`,
+            args: [email]
         });
 
         return { data: users.rows, status: 200 }
@@ -33,6 +32,7 @@ export const searchUserAuth = async ({ email, password }: TypeSearchUser) => {
         return { message: 'Error desconocido al buscar el usuario', status: 500 }
     };
 }
+
 
 export const createUser = async ({ email, passHash, rol_id, name }: TypeCreateUser) => {
     try {
