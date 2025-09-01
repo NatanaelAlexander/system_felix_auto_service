@@ -11,8 +11,11 @@
   },
   "dependencies": {
     "@iconify/vue": "^5.0.0",
+    "@libsql/client": "^0.15.14",
     "@nuxt/ui": "3.3.2",
     "@tailwindcss/vite": "^4.1.12",
+    "bcryptjs": "^3.0.2",
+    "jose": "^6.1.0",
     "nuxt": "^4.0.3",
     "reka-ui": "^2.5.0",
     "tailwindcss": "^4.1.12",
