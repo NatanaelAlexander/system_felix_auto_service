@@ -283,12 +283,13 @@ const deleteInvoice = async () => {
     const config = useRuntimeConfig()
     const url = config.public.apiBase
     
-    const response = await axios.delete(`${url}/api/invoice/deteleInvoice`, {
-      data: {
+    const response = await axios.delete(`${url}/api/invoice/deteleInvoice`, 
+      {
         invoice_id: props.invoiceData.id
-      },
-      withCredentials: true // Include cookies for authentication
-    })
+      },{
+        withCredentials: true // Include cookies for authentication
+      }
+    )
     
     if (response.data.message === 'delete success') {
       emit('invoice-deleted')
