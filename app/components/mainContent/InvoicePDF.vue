@@ -448,44 +448,32 @@ const generatePDF = async () => {
   isGenerating.value = true
   
   try {
-    console.log('Starting PDF generation...')
-    console.log('Invoice data:', props.invoiceData)
     
     const jsPDF = await import('jspdf')
-    console.log('jsPDF imported successfully')
     
     const pdf = new jsPDF.default('p', 'mm', 'a4')
-    console.log('PDF object created')
     
     const pageHeight = 297 // A4 height in mm
     const maxContentHeight = pageHeight - 40 // Leave space for footer (will be adjusted per page)
     let currentPage = 1
     let remainingServices = [...props.invoiceData.services]
     
-    console.log('Services to process:', remainingServices.length)
     
     // Draw first page with header
-    console.log('Drawing header...')
     let yPos = await drawHeader(pdf, 0)
-    console.log('Header drawn, Y position:', yPos)
     
-    console.log('Drawing services table...')
     // Calculate available height for first page (we don't know if it's the last page yet)
     const firstPageResult = drawServicesTable(pdf, remainingServices, yPos, maxContentHeight)
     remainingServices = firstPageResult.remainingServices
-    console.log('Services drawn on first page:', firstPageResult.servicesDrawn)
-    console.log('Remaining services:', remainingServices.length)
     
     // Check if this will be the only page
     const isFirstPageLast = remainingServices.length === 0
     
-    console.log('Drawing footer...')
     // Don't draw footer yet, we'll do it at the end with correct page count
     
     // Draw additional pages if needed
     while (remainingServices.length > 0) {
       currentPage++
-      console.log(`Adding page ${currentPage}...`)
       pdf.addPage()
       
       // Set background for new page
@@ -502,15 +490,12 @@ const generatePDF = async () => {
       // Draw services on new page (no header)
       const pageResult = drawServicesTable(pdf, remainingServices, 30, pageMaxHeight)
       remainingServices = pageResult.remainingServices
-      console.log(`Page ${currentPage} completed, services drawn:`, pageResult.servicesDrawn)
     }
     
     // Get the actual total pages
     const actualTotalPages = currentPage
-    console.log('Total pages generated:', actualTotalPages)
     
     // Draw totals on the last page FIRST (before footers)
-    console.log('Drawing totals...')
     let totalsEndY = 0 // Track where totals end
     
     if (actualTotalPages === 1) {
@@ -551,10 +536,8 @@ const generatePDF = async () => {
     
     // Save PDF
     const fileName = `invoice-${props.invoiceData.invoice}.pdf`
-    console.log('Saving PDF as:', fileName)
     pdf.save(fileName)
     
-    console.log('PDF generated successfully!')
     emit('pdf-generated')
     
   } catch (error) {
