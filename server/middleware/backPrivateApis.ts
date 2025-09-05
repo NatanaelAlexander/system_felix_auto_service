@@ -1,4 +1,4 @@
-import { defineEventHandler, getRequestURL, getCookie, createError } from 'h3'
+import { defineEventHandler, getRequestURL, getCookie, createError, setHeaders } from 'h3'
 import { verifyUserAndtoken } from '../controllers/users'
 
 export default defineEventHandler(async (event) => {
@@ -7,6 +7,26 @@ export default defineEventHandler(async (event) => {
 
     // 🔹 Ver si empieza con /api/invoice o /api/scripts (APIs privadas)
     if (event.node.req.url?.startsWith('/api/invoice') || event.node.req.url?.startsWith('/api/scripts')) {
+        
+        // Handle CORS preflight requests
+        if (event.node.req.method === 'OPTIONS') {
+            setHeaders(event, {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+                'Access-Control-Allow-Headers': 'Content-Type, Authorization, Cookie',
+                'Access-Control-Allow-Credentials': 'true',
+                'Access-Control-Max-Age': '86400',
+            })
+            return ''
+        }
+
+        // Set CORS headers for all API responses
+        setHeaders(event, {
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+            'Access-Control-Allow-Headers': 'Content-Type, Authorization, Cookie',
+            'Access-Control-Allow-Credentials': 'true',
+        })
         console.log('estas son mis apis privadas')
         
         try {
