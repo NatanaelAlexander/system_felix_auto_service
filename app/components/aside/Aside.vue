@@ -117,8 +117,6 @@ const logout = () => {
   // Redirect to login page
   navigateTo('/')
   
-  // Reload page as final step
-  window.location.reload()
 }
 </script>
 
