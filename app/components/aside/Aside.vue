@@ -22,8 +22,8 @@
     'w-72 h-screen bg-gradient-to-br from-gray-800 to-gray-900 fixed left-0 top-0 flex flex-col backdrop-blur-2xl z-50 transform transition-transform duration-300 ease-out md:translate-x-0 lg:fixed lg:h-screen lg:my-0 lg:mx-0 lg:rounded-none lg:border-0 lg:transform-none',
     isAsideOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0 lg:translate-x-0'
   ]">
-    <!-- User Profile Section -->
-    <div class="flex items-center p-6 border-b border-white/10 bg-gradient-to-br from-gray-700 to-gray-800 lg:rounded-t-3xl relative">
+    <!-- User Profile Section - Fixed at top -->
+    <div class="flex items-center p-6 border-b border-white/10 bg-gradient-to-br from-gray-700 to-gray-800 lg:rounded-t-3xl relative flex-shrink-0">
       <div class="w-13 h-13 rounded-full bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center mr-4 flex-shrink-0 shadow-lg border-2 border-white/10">
         <span class="text-2xl text-white">👤</span>
       </div>
@@ -33,7 +33,8 @@
       </div>
     </div>
 
-    <nav class="flex-1 py-6 px-0">
+    <!-- Navigation - Scrollable content -->
+    <nav class="flex-1 py-6 px-0 overflow-y-auto aside-scroll">
       <ul class="list-none p-0 m-0">
         <li class="mb-2 px-5">
           <NuxtLink to="/" class="flex items-center px-5 py-4 text-gray-300 no-underline transition-all duration-300 rounded-2xl relative overflow-hidden hover:bg-gray-700/60 hover:text-gray-100 hover:translate-x-1 active:bg-red-500/20 active:text-red-50 active:font-semibold active:border active:border-red-500/30 active:shadow-lg" active-class="bg-red-500/20 text-red-50 font-semibold border border-red-500/30 shadow-lg" @click="closeAside">
@@ -67,8 +68,8 @@
       </ul>
     </nav>
 
-    <!-- Logout Section - Always at bottom -->
-    <div class="mt-auto p-6 border-t border-white/10">
+    <!-- Logout Section - Fixed at bottom -->
+    <div class="p-6 border-t border-white/10 flex-shrink-0">
       <button @click="logout" class="w-full flex items-center px-5 py-4 text-gray-300 transition-all duration-300 rounded-2xl relative overflow-hidden hover:bg-red-500/20 hover:text-red-50 hover:translate-x-1 active:bg-red-500/30 active:text-red-50 active:font-semibold active:border active:border-red-500/30 active:shadow-lg bg-transparent border border-transparent">
         <svg class="w-5 h-5 mr-4 flex-shrink-0 transition-transform duration-300 stroke-2 hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
@@ -130,5 +131,30 @@ const logout = () => {
   .aside-navigation {
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05);
   }
+}
+
+/* Custom scrollbar for aside navigation */
+.aside-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.aside-scroll::-webkit-scrollbar-track {
+  background: rgba(55, 65, 81, 0.3);
+  border-radius: 3px;
+}
+
+.aside-scroll::-webkit-scrollbar-thumb {
+  background: rgba(107, 114, 128, 0.6);
+  border-radius: 3px;
+}
+
+.aside-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(156, 163, 175, 0.8);
+}
+
+/* Firefox scrollbar */
+.aside-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(107, 114, 128, 0.6) rgba(55, 65, 81, 0.3);
 }
 </style>
