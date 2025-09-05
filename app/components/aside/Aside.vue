@@ -19,7 +19,7 @@
 
   <!-- Aside Navigation -->
   <aside :class="[
-    'w-72 h-screen bg-gradient-to-br from-gray-800 to-gray-900 fixed left-0 top-0 flex flex-col backdrop-blur-2xl z-50 transform transition-transform duration-300 ease-out md:translate-x-0 lg:fixed lg:h-screen lg:my-0 lg:mx-0 lg:rounded-none lg:border-0 lg:transform-none',
+    'w-72 h-dvh sm:h-dvh md:h-dvh lg:h-screen bg-gradient-to-br from-gray-800 to-gray-900 fixed left-0 top-0 flex flex-col backdrop-blur-2xl z-50 transform transition-transform duration-300 ease-out md:translate-x-0 lg:fixed lg:my-0 lg:mx-0 lg:rounded-none lg:border-0 lg:transform-none',
     isAsideOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0 lg:translate-x-0'
   ]">
     <!-- User Profile Section - Fixed at top -->
@@ -95,6 +95,12 @@ const toggleAside = () => {
 
 const closeAside = () => {
   isAsideOpen.value = false
+  // Ensure body scroll is restored
+  if (process.client) {
+    document.body.style.overflow = ''
+    document.body.style.position = ''
+    document.body.style.width = ''
+  }
 }
 
 // Close aside on route change
@@ -117,8 +123,50 @@ const logout = () => {
   
   // Redirect to login page
   navigateTo('/')
-  
 }
+
+// Mobile viewport height fix
+onMounted(() => {
+  const setVH = () => {
+    const vh = window.innerHeight * 0.01
+    document.documentElement.style.setProperty('--vh', `${vh}px`)
+  }
+  
+  setVH()
+  window.addEventListener('resize', setVH)
+  window.addEventListener('orientationchange', setVH)
+  
+  onUnmounted(() => {
+    window.removeEventListener('resize', setVH)
+    window.removeEventListener('orientationchange', setVH)
+  })
+})
+
+// Block body scroll when aside is open on mobile/tablet
+watch(isAsideOpen, (isOpen) => {
+  if (process.client) {
+    if (isOpen) {
+      // Block body scroll
+      document.body.style.overflow = 'hidden'
+      document.body.style.position = 'fixed'
+      document.body.style.width = '100%'
+    } else {
+      // Restore body scroll
+      document.body.style.overflow = ''
+      document.body.style.position = ''
+      document.body.style.width = ''
+    }
+  }
+})
+
+// Cleanup on unmount
+onUnmounted(() => {
+  if (process.client) {
+    document.body.style.overflow = ''
+    document.body.style.position = ''
+    document.body.style.width = ''
+  }
+})
 </script>
 
 <style scoped>
@@ -156,5 +204,23 @@ const logout = () => {
 .aside-scroll {
   scrollbar-width: thin;
   scrollbar-color: rgba(107, 114, 128, 0.6) rgba(55, 65, 81, 0.3);
+}
+
+/* Mobile viewport height fix */
+@media (max-width: 1023px) {
+  .mobile-aside {
+    height: 100vh;
+    height: 100dvh; /* Dynamic viewport height for mobile */
+    height: calc(var(--vh, 1vh) * 100); /* Fallback for older browsers */
+  }
+}
+
+/* Ensure aside doesn't exceed viewport on mobile */
+@media (max-width: 1023px) {
+  aside {
+    max-height: 100vh;
+    max-height: 100dvh;
+    max-height: calc(var(--vh, 1vh) * 100);
+  }
 }
 </style>
