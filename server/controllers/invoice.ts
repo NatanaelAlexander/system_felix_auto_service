@@ -129,20 +129,38 @@ export const createServiceByInvoice = async ({ invoice_id, services }: createSer
 
 export const deleteInvoiceByID = async ({ invoice_id }: typeDeleteInvoiceByID) => {
     try {
+        console.log('deleteInvoiceByID called with invoice_id:', invoice_id)
 
-        if (!invoice_id || invoice_id == undefined || invoice_id == null)
+        if (!invoice_id || invoice_id == undefined || invoice_id == null) {
+            console.log('Missing invoice_id')
             return { message: 'Required fields missing: invoice_id', status: 400 }
-
-        const response = await deleteInvoice({ invoice_id })
-        const rowsAffected = (response.data as any)?.rowsAffected ?? 0;
-        if (rowsAffected === 0) {
-            return { data: "Service not found", status: 404 };
         }
 
+        console.log('Calling deleteInvoice model function')
+        
+        // Add timeout to prevent hanging
+        const timeoutPromise = new Promise((_, reject) => {
+            setTimeout(() => reject(new Error('Controller timeout')), 8000) // 8 second timeout
+        })
+
+        const dbPromise = deleteInvoice({ invoice_id })
+        const response = await Promise.race([dbPromise, timeoutPromise]) as any
+        
+        console.log('deleteInvoice model response:', response)
+        
+        const rowsAffected = (response.data as any)?.rowsAffected ?? 0;
+        console.log('Invoice rows affected:', rowsAffected)
+        
+        if (rowsAffected === 0) {
+            console.log('Invoice not found')
+            return { data: "Invoice not found", status: 404 };
+        }
+        
+        console.log('Invoice deleted successfully')
         return { data: "delete success", status: 200 };
     } catch (error) {
         console.error("Error, deleteInvoiceByID: ", error)
-        return { message: 'Unknown error while fetching the putCreateInvoice', status: 500 }
+        return { message: 'Unknown error while deleting invoice', status: 500 }
     }
 }
 
@@ -156,7 +174,15 @@ export const deleteServiceByIdOfInvoice = async ({ invoice_id }: typeDeleteInvoi
         }
 
         console.log('Calling deleteServices model function')
-        const response = await deleteServices({ invoice_id })
+        
+        // Add timeout to prevent hanging
+        const timeoutPromise = new Promise((_, reject) => {
+            setTimeout(() => reject(new Error('Controller timeout')), 8000) // 8 second timeout
+        })
+
+        const dbPromise = deleteServices({ invoice_id })
+        const response = await Promise.race([dbPromise, timeoutPromise]) as any
+        
         console.log('deleteServices model response:', response)
         
         const rowsAffected = (response.data as any)?.rowsAffected ?? 0;
