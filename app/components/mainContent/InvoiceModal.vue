@@ -290,8 +290,6 @@ const deleteInvoice = async () => {
       withCredentials: true // Include cookies for authentication
     })
     
-    console.log('Delete response:', response.data)
-    
     if (response.data.message === 'delete success') {
       emit('invoice-deleted')
       closeModal()

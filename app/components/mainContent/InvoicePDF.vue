@@ -555,13 +555,9 @@ const createInvoiceInDB = async (invoiceData) => {
       }))
     }
     
-    console.log('Sending data to API:', apiData)
-    
     const response = await axios.put(`${url}/api/invoice/createInvoice`, apiData, {
       withCredentials: true // Include cookies for authentication
     })
-    
-    console.log('API Response:', response.data)
     
     if (response.data.response.status === 200) {
       return { success: true, data: response.data }
@@ -585,21 +581,16 @@ const generatePDF = async () => {
   try {
     // Only create the invoice in the database if requested
     if (props.createInvoiceInDB) {
-      console.log('Creating invoice in database...', 'createInvoiceInDB prop:', props.createInvoiceInDB)
       const createResult = await createInvoiceInDB(props.invoiceData)
       
       if (!createResult.success) {
         throw new Error('Failed to create invoice in database')
       }
     } else {
-      console.log('Skipping database creation, generating PDF directly...', 'createInvoiceInDB prop:', props.createInvoiceInDB)
     }
-    
-    console.log('Invoice created successfully, generating PDF...')
     
     // Parse the date to ensure consistency between API and PDF
     const parsedDate = parseDateToAPIFormat(props.invoiceData.date)
-    console.log('Using parsed date for PDF:', parsedDate)
     
     const jsPDF = await import('jspdf')
     

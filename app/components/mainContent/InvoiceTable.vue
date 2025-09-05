@@ -220,8 +220,6 @@ const fetchInvoices = async (page = 1, filters = null) => {
       })
     }
     
-    console.log('API Response:', response.data)
-    
     if (response.data.response.status === 200) {
       invoices.value = response.data.response.data || []
       currentPage.value = page
