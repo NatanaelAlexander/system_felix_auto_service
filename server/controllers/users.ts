@@ -81,6 +81,7 @@ export const putUserCreate = async ({ email, password, rol_id, name }: TypeGetCr
         }
 
     } catch (error) {
+        console.error("Error, putUserCreate: ", error)
         return { message: 'Unknown error while fetching the user', status: 500 }
     }
 }
@@ -95,10 +96,8 @@ export const verifyUserAndtoken = async ({ token, user_id }: TypeVerifyUserAndTo
 
         /* Verificar si esta bien el token */
         const verifyToken = await validateToken(token)
-        console.log(verifyToken.user_id, user_id)
 
         /* buscar el payload del token y comprar user_id con el del token */
-
         if (verifyToken.user_id != user_id) {
             return { data: false, status: 400 }
         }
@@ -107,6 +106,7 @@ export const verifyUserAndtoken = async ({ token, user_id }: TypeVerifyUserAndTo
         return { data: true, status: 200 };
 
     } catch (error) {
+        console.error("verifyUserAndToken: ", error)
         return { message: 'Unknown error while verify User and token', status: 500 }
     }
 }
