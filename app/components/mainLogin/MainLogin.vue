@@ -1,6 +1,6 @@
 <template>
   <div
-    class="min-h-screen flex items-center justify-center p-2 sm:p-4 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 font-sans">
+    class="login-container min-h-dvh sm:min-h-dvh md:min-h-dvh lg:min-h-screen flex items-center justify-center p-2 sm:p-4 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 font-sans">
     <div
       class="w-full max-w-md min-h-[600px] sm:min-h-[650px] bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl sm:rounded-2xl p-6 sm:p-8 shadow-2xl border border-white/5 flex flex-col justify-center">
       <!-- Logo Section -->
@@ -59,7 +59,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from 'vue'
+import { ref, reactive, onMounted, onUnmounted } from 'vue'
 import axios from 'axios'
 
 interface FormData {
@@ -196,10 +196,36 @@ const handleLogin = async () => {
     isSubmitting.value = false
   }
 }
+
+// Mobile viewport height fix
+onMounted(() => {
+  const setVH = () => {
+    const vh = window.innerHeight * 0.01
+    document.documentElement.style.setProperty('--vh', `${vh}px`)
+  }
+  
+  setVH()
+  window.addEventListener('resize', setVH)
+  window.addEventListener('orientationchange', setVH)
+  
+  onUnmounted(() => {
+    window.removeEventListener('resize', setVH)
+    window.removeEventListener('orientationchange', setVH)
+  })
+})
 </script>
 
 <style scoped>
 .logo-cropped {
   clip-path: inset(20% 0% 0% 0%);
+}
+
+/* Mobile viewport height fix */
+@media (max-width: 1023px) {
+  .login-container {
+    min-height: 100vh;
+    min-height: 100dvh; /* Dynamic viewport height for mobile */
+    min-height: calc(var(--vh, 1vh) * 100); /* Fallback for older browsers */
+  }
 }
 </style>
