@@ -1,5 +1,5 @@
 import { createResponse } from "../../utils/createStatus";
-import { readBody } from "#imports";
+import { readBody, getQuery } from "#imports";
 import { deleteServiceByIdOfInvoice, deleteInvoiceByID } from "~~/server/controllers/invoice";
 
 export default defineEventHandler(async (event) => {
@@ -12,15 +12,38 @@ export default defineEventHandler(async (event) => {
         })
 
         const operationPromise = (async () => {
-            console.log('Starting to read body...')
-            const body = await readBody(event);
-            console.log('Body read successfully:', body)
+            let invoice_id = null;
+            
+            // Try to get invoice_id from body first
+            try {
+                console.log('Starting to read body...')
+                
+                // Add timeout specifically for readBody
+                const readBodyTimeout = new Promise((_, reject) => {
+                    setTimeout(() => reject(new Error('readBody timeout')), 5000) // 5 second timeout for readBody
+                })
+                
+                const readBodyPromise = readBody(event);
+                const body = await Promise.race([readBodyPromise, readBodyTimeout]);
+                console.log('Body read successfully:', body)
 
-            const { invoice_id } = body;
-            console.log('Invoice ID extracted:', invoice_id)
+                invoice_id = body.invoice_id;
+                console.log('Invoice ID extracted from body:', invoice_id)
+            } catch (bodyError) {
+                console.log('Failed to read body, trying query params:', bodyError)
+                
+                // Fallback to query parameters
+                try {
+                    const query = getQuery(event);
+                    invoice_id = query.invoice_id;
+                    console.log('Invoice ID extracted from query:', invoice_id)
+                } catch (queryError) {
+                    console.log('Failed to read query params:', queryError)
+                }
+            }
 
             if (!invoice_id) {
-                console.log('No invoice_id provided')
+                console.log('No invoice_id provided in body or query')
                 return createResponse({ message: 'invoice_id is required' }, 400);
             }
 
