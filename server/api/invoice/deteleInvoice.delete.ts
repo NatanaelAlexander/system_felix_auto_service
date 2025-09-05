@@ -32,7 +32,7 @@ export default defineEventHandler(async (event) => {
                 console.log('Body type:', typeof body)
                 console.log('Body keys:', Object.keys(body || {}))
 
-                invoice_id = await body?.invoice_id;
+                invoice_id = body?.invoice_id;
                 console.log('Invoice ID extracted from body:', invoice_id)
                 console.log('Invoice ID type:', typeof invoice_id)
             } catch (bodyError) {
@@ -49,12 +49,44 @@ export default defineEventHandler(async (event) => {
                 }
             }
 
+            // If still no invoice_id, try to get it from the request body directly
+            if (!invoice_id) {
+                console.log('Trying alternative methods to get invoice_id...')
+                
+                // Try to get from request body directly
+                try {
+                    const rawBody = await readBody(event);
+                    console.log('Raw body alternative:', rawBody)
+                    invoice_id = rawBody?.invoice_id || rawBody?.id;
+                    console.log('Invoice ID from raw body:', invoice_id)
+                } catch (rawBodyError) {
+                    console.log('Raw body alternative failed:', rawBodyError)
+                }
+                
+                // Try to get from URL path
+                if (!invoice_id) {
+                    const url = event.node.req.url;
+                    console.log('Request URL for path extraction:', url)
+                    const pathMatch = url?.match(/\/deteleInvoice\/(\d+)/);
+                    if (pathMatch) {
+                        invoice_id = pathMatch[1];
+                        console.log('Invoice ID from URL path:', invoice_id)
+                    }
+                }
+            }
+
             console.log('Final invoice_id value:', invoice_id)
             console.log('Final invoice_id type:', typeof invoice_id)
             console.log('Final invoice_id truthy:', !!invoice_id)
 
-            if (!invoice_id) {
-                console.log('No invoice_id provided in body or query')
+            // Convert to number if it's a string
+            if (invoice_id && typeof invoice_id === 'string') {
+                invoice_id = parseInt(invoice_id);
+                console.log('Converted invoice_id to number:', invoice_id)
+            }
+
+            if (!invoice_id || isNaN(invoice_id)) {
+                console.log('No valid invoice_id provided in body, query, or URL path')
                 return createResponse({ message: 'invoice_id is required' }, 400);
             }
 
