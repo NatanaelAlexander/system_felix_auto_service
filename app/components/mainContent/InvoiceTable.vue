@@ -168,6 +168,19 @@ const isFiltered = ref(false)
 const formatDate = (dateString) => {
   if (!dateString) return ''
   
+  // If it's already in YYYY-MM-DD format, parse it correctly to avoid timezone issues
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
+    // Parse the date string directly to avoid timezone issues
+    const [year, month, day] = dateString.split('-')
+    const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day))
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    })
+  }
+  
+  // For other formats, parse normally
   const date = new Date(dateString)
   if (isNaN(date.getTime())) return dateString
   

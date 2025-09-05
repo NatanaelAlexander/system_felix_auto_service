@@ -1,5 +1,5 @@
 <template>
-  <div class="space-y-4 sm:space-y-6">
+  <div v-if="showPreview" class="space-y-4 sm:space-y-6">
     <!-- Invoice preview -->
     <div class="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6">
       <!-- Header -->
@@ -15,7 +15,7 @@
         </div>
         <div class="text-left sm:text-right">
           <h2 class="text-lg sm:text-xl font-bold text-gray-900">INVOICE</h2>
-          <p class="text-xs text-gray-600">#{{ invoiceData.invoice }}</p>
+          <p class="text-xs text-gray-600">#{{ getInvoiceNumber() }}</p>
         </div>
       </div>
       
@@ -23,14 +23,14 @@
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-4 sm:mb-6">
         <div class="bg-gray-50 rounded-lg p-3 sm:p-4">
           <h3 class="text-sm sm:text-base font-semibold text-gray-900 mb-2">Customer</h3>
-          <p class="text-sm text-gray-700">{{ invoiceData.name }}</p>
-          <p class="text-sm text-gray-700">{{ invoiceData.phone }}</p>
+          <p class="text-sm text-gray-700">{{ getCustomerName() }}</p>
+          <p class="text-sm text-gray-700">{{ getCustomerPhone() }}</p>
         </div>
         <div class="bg-gray-50 rounded-lg p-3 sm:p-4">
           <h3 class="text-sm sm:text-base font-semibold text-gray-900 mb-2">Vehicle</h3>
-          <p class="text-sm text-gray-700">{{ invoiceData.car }} {{ invoiceData.year }}</p>
-          <p class="text-sm text-gray-700">License Plate: {{ invoiceData.plate }}</p>
-          <p class="text-xs text-gray-700">VIN: {{ invoiceData.vin }}</p>
+          <p class="text-sm text-gray-700">{{ getVehicleName() }} {{ getVehicleYear() }}</p>
+          <p class="text-sm text-gray-700">License Plate: {{ getLicensePlate() }}</p>
+          <p class="text-xs text-gray-700">VIN: {{ getVIN() }}</p>
         </div>
       </div>
       
@@ -38,7 +38,7 @@
       <div class="mb-4 sm:mb-6">
         <h3 class="text-sm sm:text-base font-semibold text-gray-900 mb-3">Services</h3>
         <div class="space-y-2">
-          <div v-for="(service, index) in invoiceData.services" :key="index" class="flex flex-col sm:flex-row sm:justify-between sm:items-center py-2 border-b border-gray-200 last:border-b-0 space-y-1 sm:space-y-0">
+          <div v-for="(service, index) in getServices()" :key="index" class="flex flex-col sm:flex-row sm:justify-between sm:items-center py-2 border-b border-gray-200 last:border-b-0 space-y-1 sm:space-y-0">
             <span class="text-sm text-gray-700 break-words">{{ service.description }}</span>
             <span class="text-sm font-semibold text-gray-900">${{ parseFloat(service.amount).toFixed(2) }}</span>
           </div>
@@ -50,22 +50,22 @@
         <div class="space-y-2">
           <div class="flex justify-between">
             <span class="text-sm text-gray-600">Subtotal:</span>
-            <span class="text-sm text-black font-semibold">${{ invoiceData.subtotal.toFixed(2) }}</span>
+            <span class="text-sm text-black font-semibold">${{ getSubtotal().toFixed(2) }}</span>
           </div>
           <div class="flex justify-between">
-            <span class="text-sm text-gray-600">Tax ({{ invoiceData.taxRate }}%):</span>
-            <span class="text-sm text-black font-semibold">${{ invoiceData.taxAmount.toFixed(2) }}</span>
+            <span class="text-sm text-gray-600">Tax ({{ getTaxRate() }}%):</span>
+            <span class="text-sm text-black font-semibold">${{ getTaxAmount().toFixed(2) }}</span>
           </div>
           <div class="flex justify-between text-base sm:text-lg font-bold text-red-600">
             <span>TOTAL:</span>
-            <span>${{ invoiceData.total.toFixed(2) }}</span>
+            <span>${{ getTotal().toFixed(2) }}</span>
           </div>
         </div>
       </div>
     </div>
 
     <!-- Download button -->
-    <button @click="generatePDF" :disabled="isGenerating" class="w-full bg-red-600 hover:bg-red-700 text-white py-3 sm:py-4 px-4 sm:px-6 rounded-xl font-semibold text-base sm:text-lg flex items-center justify-center transition-colors duration-200">
+    <button v-if="showDownloadButton" @click="generatePDF" :disabled="isGenerating" class="w-full bg-red-600 hover:bg-red-700 text-white py-3 sm:py-4 px-4 sm:px-6 rounded-xl font-semibold text-base sm:text-lg flex items-center justify-center transition-colors duration-200">
       <svg v-if="!isGenerating" class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
       </svg>
@@ -83,11 +83,77 @@ const props = defineProps({
   invoiceData: {
     type: Object,
     required: true
+  },
+  showPreview: {
+    type: Boolean,
+    default: true
+  },
+  showDownloadButton: {
+    type: Boolean,
+    default: true
+  },
+  createInvoiceInDB: {
+    type: Boolean,
+    default: true
   }
 })
 
 const emit = defineEmits(['pdf-generated'])
 const isGenerating = ref(false)
+
+// Helper functions to handle different data formats
+const getInvoiceNumber = () => {
+  return props.invoiceData.invoice || props.invoiceData.id || 'N/A'
+}
+
+const getCustomerName = () => {
+  return props.invoiceData.name || props.invoiceData.customer_name || 'N/A'
+}
+
+const getCustomerPhone = () => {
+  return props.invoiceData.phone || props.invoiceData.customer_phone_1 || 'N/A'
+}
+
+const getVehicleName = () => {
+  return props.invoiceData.car || props.invoiceData.vehicle_name || 'N/A'
+}
+
+const getVehicleYear = () => {
+  return props.invoiceData.year || props.invoiceData.vehicle_year || 'N/A'
+}
+
+const getLicensePlate = () => {
+  return props.invoiceData.plate || props.invoiceData.vehicle_licence_plate || 'N/A'
+}
+
+const getVIN = () => {
+  return props.invoiceData.vin || props.invoiceData.vehicle_vin || 'N/A'
+}
+
+const getServices = () => {
+  return props.invoiceData.services || []
+}
+
+const getSubtotal = () => {
+  return props.invoiceData.subtotal || props.invoiceData.sub_total || 0
+}
+
+const getTaxRate = () => {
+  return props.invoiceData.taxRate || props.invoiceData.tax || 0
+}
+
+const getTaxAmount = () => {
+  if (props.invoiceData.taxAmount) {
+    return props.invoiceData.taxAmount
+  }
+  const subtotal = getSubtotal()
+  const taxRate = getTaxRate()
+  return subtotal * (taxRate / 100)
+}
+
+const getTotal = () => {
+  return props.invoiceData.total || 0
+}
 
 // Function to split text into multiple lines based on width
 const splitTextToSize = (pdf, text, maxWidth) => {
@@ -174,7 +240,7 @@ const drawHeader = async (pdf, yPos, parsedDate) => {
   
   pdf.setFontSize(10)
   pdf.setFont('helvetica', 'normal')
-  pdf.text(`#${props.invoiceData.invoice}`, 150, 28)
+  pdf.text(`#${getInvoiceNumber()}`, 150, 28)
   pdf.text(`Date: ${formatDate(parsedDate)}`, 150, 35)
   
   // Company information (details)
@@ -203,24 +269,23 @@ const drawHeader = async (pdf, yPos, parsedDate) => {
   
   pdf.setFontSize(9)
   pdf.setFont('helvetica', 'normal')
-  pdf.text(`Name: ${props.invoiceData.name}`, 25, currentY + 8)
-  pdf.text(`Phone: ${props.invoiceData.phone}`, 25, currentY + 13)
-  pdf.text(`Vehicle: ${props.invoiceData.car} ${props.invoiceData.year}`, 25, currentY + 18)
-  pdf.text(`License Plate: ${props.invoiceData.plate}`, 110, currentY + 8)
-  pdf.text(`VIN: ${props.invoiceData.vin}`, 110, currentY + 13)
+  pdf.text(`Name: ${getCustomerName()}`, 25, currentY + 8)
+  pdf.text(`Phone: ${getCustomerPhone()}`, 25, currentY + 13)
+  pdf.text(`Vehicle: ${getVehicleName()} ${getVehicleYear()}`, 25, currentY + 18)
+  pdf.text(`License Plate: ${getLicensePlate()}`, 110, currentY + 8)
+  pdf.text(`VIN: ${getVIN()}`, 110, currentY + 13)
   
   return currentY + 35 // Return the Y position after header
 }
 
-// Function to draw footer (on all pages)
+// Function to draw footer (only signature on last page)
 const drawFooter = (pdf, pageNumber, totalPages, totalsEndY = 0) => {
   const borderGray = [229, 231, 235]
   const darkGray = [55, 65, 81]
-  let footerY = 270
   
-  // If this is the last page, add signature section
+  // Only add signature section on the last page
   if (pageNumber === totalPages) {
-    // Add legal text above signature (more gray) with more padding
+    // Add legal text above signature
     const legalText = "By signing this document, the client confirms that they agree with the described service and ensures that it corresponds to what was requested."
     pdf.setFontSize(8)
     pdf.setFont('helvetica', 'normal')
@@ -259,22 +324,7 @@ const drawFooter = (pdf, pageNumber, totalPages, totalsEndY = 0) => {
     pdf.setFont('helvetica', 'normal')
     pdf.setTextColor(...darkGray)
     pdf.text('Client Signature', 105, signatureY + 8, { align: 'center' })
-    
-    // Adjust footer position
-    footerY = signatureY + 15
   }
-  
-  pdf.setDrawColor(...borderGray)
-  pdf.line(20, footerY, 190, footerY)
-  
-  pdf.setFontSize(8)
-  pdf.setFont('helvetica', 'normal')
-  pdf.setTextColor(156, 163, 175)
-  pdf.text('Thank you for trusting our professional automotive services.', 20, footerY + 5)
-  pdf.text('For inquiries: (757) 839-5504', 20, footerY + 10)
-  
-  // Add page number
-  pdf.text(`Page ${pageNumber} of ${totalPages}`, 150, footerY + 10)
 }
 
 // Function to calculate services position without drawing (for simulation)
@@ -420,29 +470,29 @@ const drawTotals = (pdf, yPos) => {
   const borderGray = [229, 231, 235]
   
   pdf.setFillColor(255, 255, 255)
-  pdf.rect(20, yPos - 5, 170, 30, 'F')
+  pdf.rect(20, yPos - 3, 170, 20, 'F')
   pdf.setDrawColor(...borderGray)
-  pdf.rect(20, yPos - 5, 170, 30, 'S')
+  pdf.rect(20, yPos - 3, 170, 20, 'S')
   
   // Centered summary title
-  pdf.setFontSize(12)
+  pdf.setFontSize(10)
   pdf.setFont('helvetica', 'bold')
   pdf.setTextColor(...darkGray)
-  pdf.text('COST SUMMARY', 105, yPos + 2, { align: 'center' })
+  pdf.text('COST SUMMARY', 105, yPos + 1, { align: 'center' })
+  
+  pdf.setFontSize(8)
+  pdf.setFont('helvetica', 'normal')
+  pdf.text('Subtotal:', 25, yPos + 7)
+  pdf.text(`$${getSubtotal().toFixed(2)}`, 150, yPos + 7)
+  
+  pdf.text(`Tax (${getTaxRate()}%):`, 25, yPos + 11)
+  pdf.text(`$${getTaxAmount().toFixed(2)}`, 150, yPos + 11)
   
   pdf.setFontSize(9)
-  pdf.setFont('helvetica', 'normal')
-  pdf.text('Subtotal:', 25, yPos + 10)
-  pdf.text(`$${props.invoiceData.subtotal.toFixed(2)}`, 150, yPos + 10)
-  
-  pdf.text(`Tax (${props.invoiceData.taxRate}%):`, 25, yPos + 15)
-  pdf.text(`$${props.invoiceData.taxAmount.toFixed(2)}`, 150, yPos + 15)
-  
-  pdf.setFontSize(11)
   pdf.setFont('helvetica', 'bold')
   pdf.setTextColor(...primaryColor)
-  pdf.text('TOTAL:', 25, yPos + 22)
-  pdf.text(`$${props.invoiceData.total.toFixed(2)}`, 150, yPos + 22)
+  pdf.text('TOTAL:', 25, yPos + 16)
+  pdf.text(`$${getTotal().toFixed(2)}`, 150, yPos + 16)
 }
 
 // Function to parse date from text format to API format (2025-09-05)
@@ -489,17 +539,17 @@ const createInvoiceInDB = async (invoiceData) => {
     // Prepare data for API
     const apiData = {
       date: apiDate,
-      customer_name: invoiceData.name,
-      customer_phone_1: invoiceData.phone || null,
+      customer_name: getCustomerName(),
+      customer_phone_1: getCustomerPhone() || null,
       customer_phone_2: null,
-      vehicle_name: invoiceData.car,
-      vehicle_year: parseInt(invoiceData.year),
-      vehicle_licence_plate: invoiceData.plate,
-      vehicle_vin: invoiceData.vin,
-      sub_total: parseFloat(invoiceData.subtotal),
-      tax: parseFloat(invoiceData.taxRate),
-      total: parseFloat(invoiceData.total),
-      services: invoiceData.services.map(service => ({
+      vehicle_name: getVehicleName(),
+      vehicle_year: parseInt(getVehicleYear()),
+      vehicle_licence_plate: getLicensePlate(),
+      vehicle_vin: getVIN(),
+      sub_total: parseFloat(getSubtotal()),
+      tax: parseFloat(getTaxRate()),
+      total: parseFloat(getTotal()),
+      services: getServices().map(service => ({
         description: service.description,
         amount: parseFloat(service.amount)
       }))
@@ -533,12 +583,16 @@ const generatePDF = async () => {
   isGenerating.value = true
   
   try {
-    // First, create the invoice in the database
-    console.log('Creating invoice in database...')
-    const createResult = await createInvoiceInDB(props.invoiceData)
-    
-    if (!createResult.success) {
-      throw new Error('Failed to create invoice in database')
+    // Only create the invoice in the database if requested
+    if (props.createInvoiceInDB) {
+      console.log('Creating invoice in database...', 'createInvoiceInDB prop:', props.createInvoiceInDB)
+      const createResult = await createInvoiceInDB(props.invoiceData)
+      
+      if (!createResult.success) {
+        throw new Error('Failed to create invoice in database')
+      }
+    } else {
+      console.log('Skipping database creation, generating PDF directly...', 'createInvoiceInDB prop:', props.createInvoiceInDB)
     }
     
     console.log('Invoice created successfully, generating PDF...')
@@ -554,7 +608,7 @@ const generatePDF = async () => {
     const pageHeight = 297 // A4 height in mm
     const maxContentHeight = pageHeight - 40 // Leave space for footer (will be adjusted per page)
     let currentPage = 1
-    let remainingServices = [...props.invoiceData.services]
+    let remainingServices = [...getServices()]
     
     
     // Draw first page with header
@@ -600,7 +654,7 @@ const generatePDF = async () => {
       // If only one page, draw totals after services
       const totalsY = firstPageResult.currentY + 10
       drawTotals(pdf, totalsY)
-      totalsEndY = totalsY + 30 // Totals section is about 30mm high
+      totalsEndY = totalsY + 20 // Totals section is now 20mm high (reduced from 30mm)
     } else {
       // If multiple pages, draw totals on the last page
       pdf.setPage(actualTotalPages)
@@ -608,7 +662,7 @@ const generatePDF = async () => {
       // Calculate where services ended on the last page
       // We need to find the last service position without actually drawing
       let lastServiceY = 30 // Start position for services on additional pages
-      let tempServices = [...props.invoiceData.services]
+      let tempServices = [...getServices()]
       
       // Simulate drawing services to find where they end (without actually drawing)
       for (let pageNum = 1; pageNum < actualTotalPages; pageNum++) {
@@ -623,7 +677,7 @@ const generatePDF = async () => {
       // Position totals right after the last service, with some spacing
       const totalsY = lastServiceY + 15
       drawTotals(pdf, totalsY)
-      totalsEndY = totalsY + 30 // Totals section is about 30mm high
+      totalsEndY = totalsY + 20 // Totals section is now 20mm high (reduced from 30mm)
     }
     
     // Now draw all footers with correct total page count (AFTER totals)
@@ -633,7 +687,7 @@ const generatePDF = async () => {
     }
     
     // Save PDF
-    const fileName = `invoice-${props.invoiceData.invoice}.pdf`
+    const fileName = `invoice-${getInvoiceNumber()}.pdf`
     pdf.save(fileName)
     
     emit('pdf-generated')
@@ -688,6 +742,11 @@ const formatDate = (dateString) => {
     day: 'numeric'
   })
 }
+
+// Expose the generatePDF function for external use
+defineExpose({
+  generatePDF
+})
 </script>
 
 <style scoped>

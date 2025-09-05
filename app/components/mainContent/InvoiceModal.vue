@@ -180,10 +180,13 @@
     </div>
 
     <!-- Hidden PDF Generator Component -->
-    <PDFGenerator 
+    <InvoicePDF 
       v-if="invoiceData"
       ref="pdfGeneratorRef"
       :invoice-data="invoiceData"
+      :show-preview="false"
+      :show-download-button="false"
+      :create-invoice-in-d-b="false"
       @pdf-generated="isGeneratingPDF = false"
     />
   </div>
@@ -192,7 +195,7 @@
 <script setup>
 import { ref } from 'vue'
 import axios from 'axios'
-import PDFGenerator from './PDFGenerator.vue'
+import InvoicePDF from './InvoicePDF.vue'
 
 const props = defineProps({
   isOpen: {
@@ -216,6 +219,19 @@ const pdfGeneratorRef = ref(null)
 const formatDate = (dateString) => {
   if (!dateString) return ''
   
+  // If it's already in YYYY-MM-DD format, parse it correctly to avoid timezone issues
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
+    // Parse the date string directly to avoid timezone issues
+    const [year, month, day] = dateString.split('-')
+    const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day))
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    })
+  }
+  
+  // For other formats, parse normally
   const date = new Date(dateString)
   if (isNaN(date.getTime())) return dateString
   
