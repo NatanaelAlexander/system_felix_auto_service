@@ -74,36 +74,52 @@ export const createService = async ({ invoice_id, description, amount }: typeCre
 
 export const deleteServices = async ({ invoice_id }: typeDeleteService) => {
     try {
+        console.log('deleteServices model called with invoice_id:', invoice_id)
 
-        const service = await tursoClient.execute({
+        // Add timeout to prevent hanging
+        const timeoutPromise = new Promise((_, reject) => {
+            setTimeout(() => reject(new Error('Database operation timeout')), 10000) // 10 second timeout
+        })
+
+        const dbPromise = tursoClient.execute({
             sql: `
             DELETE FROM services WHERE invoice_id = ?`,
             args: [invoice_id]
         });
 
+        const service = await Promise.race([dbPromise, timeoutPromise])
+        console.log('deleteServices model result:', service)
         return { data: service, status: 200 };
 
     } catch (error) {
         console.log("deleteService error", error);
-        return { message: 'Error desconocido al buscar al crear usuario', status: 500 }
-    };
+        return { message: 'Error desconocido al eliminar servicios', status: 500 }
+    }
 }
 
 export const deleteInvoice = async ({ invoice_id }: typeDeleteService) => {
     try {
+        console.log('deleteInvoice model called with invoice_id:', invoice_id)
 
-        const service = await tursoClient.execute({
+        // Add timeout to prevent hanging
+        const timeoutPromise = new Promise((_, reject) => {
+            setTimeout(() => reject(new Error('Database operation timeout')), 10000) // 10 second timeout
+        })
+
+        const dbPromise = tursoClient.execute({
             sql: `
             DELETE FROM invoices WHERE id = ?`,
             args: [invoice_id]
         });
 
+        const service = await Promise.race([dbPromise, timeoutPromise])
+        console.log('deleteInvoice model result:', service)
         return { data: service, status: 200 };
 
     } catch (error) {
         console.log("deleteInvoice error", error);
-        return { message: 'Error desconocido al buscar al crear usuario', status: 500 }
-    };
+        return { message: 'Error desconocido al eliminar invoice', status: 500 }
+    }
 }
 
 export const invoicesPerPage = async ({ offset }: typeInvoicesPerPage) => {

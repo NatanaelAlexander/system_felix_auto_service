@@ -134,7 +134,7 @@ export const deleteInvoiceByID = async ({ invoice_id }: typeDeleteInvoiceByID) =
             return { message: 'Required fields missing: invoice_id', status: 400 }
 
         const response = await deleteInvoice({ invoice_id })
-        const rowsAffected = response.data?.rowsAffected ?? 0;
+        const rowsAffected = (response.data as any)?.rowsAffected ?? 0;
         if (rowsAffected === 0) {
             return { data: "Service not found", status: 404 };
         }
@@ -148,19 +148,31 @@ export const deleteInvoiceByID = async ({ invoice_id }: typeDeleteInvoiceByID) =
 
 export const deleteServiceByIdOfInvoice = async ({ invoice_id }: typeDeleteInvoiceByID) => {
     try {
+        console.log('deleteServiceByIdOfInvoice called with invoice_id:', invoice_id)
 
-        if (!invoice_id || invoice_id == undefined || invoice_id == null)
+        if (!invoice_id || invoice_id == undefined || invoice_id == null) {
+            console.log('Missing invoice_id')
             return { message: 'Required fields missing: invoice_id', status: 400 }
-
-        const response = await deleteServices({ invoice_id })
-        const rowsAffected = response.data?.rowsAffected ?? 0;
-        if (rowsAffected === 0) {
-            return { data: "Service not found", status: 404 };
         }
+
+        console.log('Calling deleteServices model function')
+        const response = await deleteServices({ invoice_id })
+        console.log('deleteServices model response:', response)
+        
+        const rowsAffected = (response.data as any)?.rowsAffected ?? 0;
+        console.log('Services rows affected:', rowsAffected)
+        
+        // Don't fail if no services found - this is OK
+        if (rowsAffected === 0) {
+            console.log('No services found to delete - this is OK')
+            return { data: "No services found", status: 200 }; // Changed from 404 to 200
+        }
+        
+        console.log('Services deleted successfully')
         return { data: "delete success", status: 200 };
     } catch (error) {
-        console.error("Error, putCreateInvoice: ", error)
-        return { message: 'Unknown error while fetching the putCreateInvoice', status: 500 }
+        console.error("Error, deleteServiceByIdOfInvoice: ", error)
+        return { message: 'Unknown error while deleting services', status: 500 }
     }
 }
 
