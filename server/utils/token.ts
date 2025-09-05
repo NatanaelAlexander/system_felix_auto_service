@@ -7,7 +7,8 @@ interface TypeGenerateToken {
 
 export const generateToken = async ({ user_id, rol_id }: TypeGenerateToken) => {
     try {
-        const secret = new TextEncoder().encode(process.env.APP_SECRET_WORD);
+        const config = useRuntimeConfig();
+        const secret = new TextEncoder().encode(config.appSecretWord);
 
         const token = await new jose.SignJWT({
             user_id: user_id,
@@ -27,7 +28,8 @@ export const generateToken = async ({ user_id, rol_id }: TypeGenerateToken) => {
 
 export const validateToken = async (token: string) => {
     try {
-        const secret = new TextEncoder().encode(process.env.APP_SECRET_WORD);
+        const config = useRuntimeConfig();
+        const secret = new TextEncoder().encode(config.appSecretWord);
         const { payload } = await jose.jwtVerify(token, secret)
         return payload // aquí estarán user_id, rol_id, iat, exp
     } catch (err) {
