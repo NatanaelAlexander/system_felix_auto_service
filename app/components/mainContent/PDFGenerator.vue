@@ -1,83 +1,5 @@
-<template>
-  <div class="space-y-4 sm:space-y-6">
-    <!-- Invoice preview -->
-    <div class="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6">
-      <!-- Header -->
-      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 sm:mb-6 space-y-3 sm:space-y-0">
-        <div class="flex items-center space-x-2 sm:space-x-3">
-          <div class="w-8 h-8 sm:w-10 sm:h-10 bg-red-600 rounded-lg flex items-center justify-center">
-            <img src="/logo_fenix_sin_fondo.png" alt="Logo" class="w-6 h-6 sm:w-8 sm:h-8 object-contain" />
-          </div>
-          <div>
-            <h1 class="text-base sm:text-lg font-bold text-gray-900">RICARDO FELIX</h1>
-            <p class="text-xs sm:text-sm font-semibold text-red-600">FELIX AUTO SERVICE LLC</p>
-          </div>
-        </div>
-        <div class="text-left sm:text-right">
-          <h2 class="text-lg sm:text-xl font-bold text-gray-900">INVOICE</h2>
-          <p class="text-xs text-gray-600">#{{ invoiceData.invoice }}</p>
-        </div>
-      </div>
-      
-      <!-- Customer information -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-4 sm:mb-6">
-        <div class="bg-gray-50 rounded-lg p-3 sm:p-4">
-          <h3 class="text-sm sm:text-base font-semibold text-gray-900 mb-2">Customer</h3>
-          <p class="text-sm text-gray-700">{{ invoiceData.name }}</p>
-          <p class="text-sm text-gray-700">{{ invoiceData.phone }}</p>
-        </div>
-        <div class="bg-gray-50 rounded-lg p-3 sm:p-4">
-          <h3 class="text-sm sm:text-base font-semibold text-gray-900 mb-2">Vehicle</h3>
-          <p class="text-sm text-gray-700">{{ invoiceData.car }} {{ invoiceData.year }}</p>
-          <p class="text-sm text-gray-700">License Plate: {{ invoiceData.plate }}</p>
-          <p class="text-xs text-gray-700">VIN: {{ invoiceData.vin }}</p>
-        </div>
-      </div>
-      
-      <!-- Services -->
-      <div class="mb-4 sm:mb-6">
-        <h3 class="text-sm sm:text-base font-semibold text-gray-900 mb-3">Services</h3>
-        <div class="space-y-2">
-          <div v-for="(service, index) in invoiceData.services" :key="index" class="flex flex-col sm:flex-row sm:justify-between sm:items-center py-2 border-b border-gray-200 last:border-b-0 space-y-1 sm:space-y-0">
-            <span class="text-sm text-gray-700 break-words">{{ service.description }}</span>
-            <span class="text-sm font-semibold text-gray-900">${{ parseFloat(service.amount).toFixed(2) }}</span>
-          </div>
-        </div>
-      </div>
-      
-      <!-- Totals -->
-      <div class="border-t border-gray-200 pt-3 sm:pt-4">
-        <div class="space-y-2">
-          <div class="flex justify-between">
-            <span class="text-sm text-gray-600">Subtotal:</span>
-            <span class="text-sm text-black font-semibold">${{ invoiceData.subtotal.toFixed(2) }}</span>
-          </div>
-          <div class="flex justify-between">
-            <span class="text-sm text-gray-600">Tax ({{ invoiceData.taxRate }}%):</span>
-            <span class="text-sm text-black font-semibold">${{ invoiceData.taxAmount.toFixed(2) }}</span>
-          </div>
-          <div class="flex justify-between text-base sm:text-lg font-bold text-red-600">
-            <span>TOTAL:</span>
-            <span>${{ invoiceData.total.toFixed(2) }}</span>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Download button -->
-    <button @click="generatePDF" :disabled="isGenerating" class="w-full bg-red-600 hover:bg-red-700 text-white py-3 sm:py-4 px-4 sm:px-6 rounded-xl font-semibold text-base sm:text-lg flex items-center justify-center transition-colors duration-200">
-      <svg v-if="!isGenerating" class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
-      </svg>
-      <span v-if="isGenerating">Generating...</span>
-      <span v-else>Download PDF</span>
-    </button>
-  </div>
-</template>
-
 <script setup>
 import { ref } from 'vue'
-import axios from 'axios'
 
 const props = defineProps({
   invoiceData: {
@@ -174,7 +96,7 @@ const drawHeader = async (pdf, yPos, parsedDate) => {
   
   pdf.setFontSize(10)
   pdf.setFont('helvetica', 'normal')
-  pdf.text(`#${props.invoiceData.invoice}`, 150, 28)
+  pdf.text(`#${props.invoiceData.id}`, 150, 28)
   pdf.text(`Date: ${formatDate(parsedDate)}`, 150, 35)
   
   // Company information (details)
@@ -203,11 +125,11 @@ const drawHeader = async (pdf, yPos, parsedDate) => {
   
   pdf.setFontSize(9)
   pdf.setFont('helvetica', 'normal')
-  pdf.text(`Name: ${props.invoiceData.name}`, 25, currentY + 8)
-  pdf.text(`Phone: ${props.invoiceData.phone}`, 25, currentY + 13)
-  pdf.text(`Vehicle: ${props.invoiceData.car} ${props.invoiceData.year}`, 25, currentY + 18)
-  pdf.text(`License Plate: ${props.invoiceData.plate}`, 110, currentY + 8)
-  pdf.text(`VIN: ${props.invoiceData.vin}`, 110, currentY + 13)
+  pdf.text(`Name: ${props.invoiceData.customer_name}`, 25, currentY + 8)
+  pdf.text(`Phone: ${props.invoiceData.customer_phone_1}`, 25, currentY + 13)
+  pdf.text(`Vehicle: ${props.invoiceData.vehicle_name} ${props.invoiceData.vehicle_year}`, 25, currentY + 18)
+  pdf.text(`License Plate: ${props.invoiceData.vehicle_licence_plate}`, 110, currentY + 8)
+  pdf.text(`VIN: ${props.invoiceData.vehicle_vin}`, 110, currentY + 13)
   
   return currentY + 35 // Return the Y position after header
 }
@@ -433,10 +355,10 @@ const drawTotals = (pdf, yPos) => {
   pdf.setFontSize(9)
   pdf.setFont('helvetica', 'normal')
   pdf.text('Subtotal:', 25, yPos + 10)
-  pdf.text(`$${props.invoiceData.subtotal.toFixed(2)}`, 150, yPos + 10)
+  pdf.text(`$${props.invoiceData.sub_total.toFixed(2)}`, 150, yPos + 10)
   
-  pdf.text(`Tax (${props.invoiceData.taxRate}%):`, 25, yPos + 15)
-  pdf.text(`$${props.invoiceData.taxAmount.toFixed(2)}`, 150, yPos + 15)
+  pdf.text(`Tax (${props.invoiceData.tax}%):`, 25, yPos + 15)
+  pdf.text(`$${(props.invoiceData.sub_total * (props.invoiceData.tax / 100)).toFixed(2)}`, 150, yPos + 15)
   
   pdf.setFontSize(11)
   pdf.setFont('helvetica', 'bold')
@@ -445,108 +367,36 @@ const drawTotals = (pdf, yPos) => {
   pdf.text(`$${props.invoiceData.total.toFixed(2)}`, 150, yPos + 22)
 }
 
-// Function to parse date from text format to API format (2025-09-05)
-const parseDateToAPIFormat = (dateString) => {
-  if (!dateString) {
-    // Return current date in Washington DC timezone
-    const now = new Date()
-    const washingtonTime = new Date(now.toLocaleString("en-US", {timeZone: "America/New_York"}))
-    return washingtonTime.toISOString().split('T')[0]
-  }
+const formatDate = (dateString) => {
+  if (!dateString) return ''
   
-  // If it's already in YYYY-MM-DD format, return as is
+  // If it's already in YYYY-MM-DD format, parse it correctly
   if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
-    return dateString
-  }
-  
-  // Parse date from text format like "August 31, 2025"
-  // Create date in Washington DC timezone to avoid timezone issues
-  const date = new Date(dateString + ' 12:00:00')
-  if (isNaN(date.getTime())) {
-    // If parsing fails, return current date in Washington DC timezone
-    const now = new Date()
-    const washingtonTime = new Date(now.toLocaleString("en-US", {timeZone: "America/New_York"}))
-    return washingtonTime.toISOString().split('T')[0]
-  }
-  
-  // Format to YYYY-MM-DD using the date as-is (no timezone conversion needed since we set 12:00:00)
-  const year = date.getFullYear()
-  const month = String(date.getMonth() + 1).padStart(2, '0')
-  const day = String(date.getDate()).padStart(2, '0')
-  
-  return `${year}-${month}-${day}`
-}
-
-// Function to create invoice in the database
-const createInvoiceInDB = async (invoiceData) => {
-  try {
-    const config = useRuntimeConfig()
-    const url = config.public.apiBase
-    
-    // Parse date to API format
-    const apiDate = parseDateToAPIFormat(invoiceData.date)
-    
-    // Prepare data for API
-    const apiData = {
-      date: apiDate,
-      customer_name: invoiceData.name,
-      customer_phone_1: invoiceData.phone || null,
-      customer_phone_2: null,
-      vehicle_name: invoiceData.car,
-      vehicle_year: parseInt(invoiceData.year),
-      vehicle_licence_plate: invoiceData.plate,
-      vehicle_vin: invoiceData.vin,
-      sub_total: parseFloat(invoiceData.subtotal),
-      tax: parseFloat(invoiceData.taxRate),
-      total: parseFloat(invoiceData.total),
-      services: invoiceData.services.map(service => ({
-        description: service.description,
-        amount: parseFloat(service.amount)
-      }))
-    }
-    
-    console.log('Sending data to API:', apiData)
-    
-    const response = await axios.put(`${url}/api/invoice/createInvoice`, apiData, {
-      withCredentials: true // Include cookies for authentication
+    // Parse the date string directly to avoid timezone issues
+    const [year, month, day] = dateString.split('-')
+    const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day))
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
     })
-    
-    console.log('API Response:', response.data)
-    
-    if (response.data.response.status === 200) {
-      return { success: true, data: response.data }
-    } else {
-      throw new Error(response.data.response.message || 'Failed to create invoice')
-    }
-    
-  } catch (error) {
-    console.error('Error creating invoice:', error)
-    if (error.response) {
-      console.error('Error response:', error.response.data)
-      throw new Error(error.response.data.message || 'Failed to create invoice')
-    }
-    throw error
   }
+  
+  // For other formats, parse normally
+  const date = new Date(dateString)
+  if (isNaN(date.getTime())) return dateString
+  
+  return date.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  })
 }
 
 const generatePDF = async () => {
   isGenerating.value = true
   
   try {
-    // First, create the invoice in the database
-    console.log('Creating invoice in database...')
-    const createResult = await createInvoiceInDB(props.invoiceData)
-    
-    if (!createResult.success) {
-      throw new Error('Failed to create invoice in database')
-    }
-    
-    console.log('Invoice created successfully, generating PDF...')
-    
-    // Parse the date to ensure consistency between API and PDF
-    const parsedDate = parseDateToAPIFormat(props.invoiceData.date)
-    console.log('Using parsed date for PDF:', parsedDate)
-    
     const jsPDF = await import('jspdf')
     
     const pdf = new jsPDF.default('p', 'mm', 'a4')
@@ -556,6 +406,8 @@ const generatePDF = async () => {
     let currentPage = 1
     let remainingServices = [...props.invoiceData.services]
     
+    // Use the date from the invoice data
+    const parsedDate = props.invoiceData.date
     
     // Draw first page with header
     let yPos = await drawHeader(pdf, 0, parsedDate)
@@ -566,8 +418,6 @@ const generatePDF = async () => {
     
     // Check if this will be the only page
     const isFirstPageLast = remainingServices.length === 0
-    
-    // Don't draw footer yet, we'll do it at the end with correct page count
     
     // Draw additional pages if needed
     while (remainingServices.length > 0) {
@@ -633,79 +483,21 @@ const generatePDF = async () => {
     }
     
     // Save PDF
-    const fileName = `invoice-${props.invoiceData.invoice}.pdf`
+    const fileName = `invoice-${props.invoiceData.id}.pdf`
     pdf.save(fileName)
     
     emit('pdf-generated')
     
   } catch (error) {
     console.error('Error generating PDF:', error)
-    console.error('Error details:', {
-      message: error.message,
-      stack: error.stack,
-      name: error.name
-    })
-    
-    // Show user-friendly error
-    let errorMessage = 'An error occurred while processing your request.'
-    
-    if (error.message.includes('create invoice')) {
-      errorMessage = `Failed to create invoice: ${error.message}`
-    } else if (error.message.includes('PDF')) {
-      errorMessage = `Failed to generate PDF: ${error.message}`
-    } else {
-      errorMessage = `Error: ${error.message}`
-    }
-    
-    alert(errorMessage)
+    alert(`Error generating PDF: ${error.message}`)
   } finally {
     isGenerating.value = false
   }
 }
 
-const formatDate = (dateString) => {
-  if (!dateString) return ''
-  
-  // If it's already in YYYY-MM-DD format, parse it correctly
-  if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
-    // Parse the date string directly to avoid timezone issues
-    const [year, month, day] = dateString.split('-')
-    const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day))
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    })
-  }
-  
-  // For other formats, parse normally
-  const date = new Date(dateString)
-  if (isNaN(date.getTime())) return ''
-  
-  return date.toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-  })
-}
+// Expose the generatePDF function
+defineExpose({
+  generatePDF
+})
 </script>
-
-<style scoped>
-/* Additional styles for preview */
-@media print {
-  .invoice-preview {
-    box-shadow: none;
-    border: none;
-  }
-}
-
-/* Smooth animations */
-.invoice-preview {
-  transition: all 0.3s ease-in-out;
-}
-
-/* Hover effects for interactive elements */
-.hover\:bg-gray-50:hover {
-  background-color: rgba(249, 250, 251, 0.8);
-}
-</style> 
