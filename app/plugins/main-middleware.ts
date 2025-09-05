@@ -3,12 +3,10 @@ export default defineNuxtPlugin((nuxtApp) => {
   const router = nuxtApp.$router as any
 
   router.beforeEach(async (to: any, from: any) => {
-    console.log('Soy el middleware')
 
     if (to.path !== '/') {
       // Solo ejecutar en el cliente (no en SSR)
       if (typeof window === 'undefined') {
-        console.log('Ejecutándose en servidor, saltando validación')
         return
       }
 
@@ -27,7 +25,6 @@ export default defineNuxtPlugin((nuxtApp) => {
 
       // Si no hay cookies, redirigir al login
       if (!tokenCookie || !userCookie) {
-        console.log('No hay cookies de autenticación, redirigiendo a /')
         return router.push('/')
       }
 
@@ -37,7 +34,6 @@ export default defineNuxtPlugin((nuxtApp) => {
         const userData = JSON.parse(decodedUserCookie)
 
         if (!userData.id) {
-          console.log('Cookie de usuario inválida, redirigiendo a /')
           return router.push('/')
         }
 
@@ -57,7 +53,6 @@ export default defineNuxtPlugin((nuxtApp) => {
 
         // Si la API responde con error o no está autenticado, redirigir
         if (!result) {
-          console.log('Token inválido o expirado, redirigiendo a /')
           return router.push('/')
         }
 
