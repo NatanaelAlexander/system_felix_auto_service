@@ -1,7 +1,9 @@
 <template>
     <NuxtLayout name="ejemplo">
-        <div class="bg-red-500 w-full min-w-full">
-            <h1>Invoices</h1>
-        </div>
+    <span class="flex justify-center items-center h-dvh">
+        <p class="text-white">
+            Working...
+        </p>
+    </span>
     </NuxtLayout>
 </template>
