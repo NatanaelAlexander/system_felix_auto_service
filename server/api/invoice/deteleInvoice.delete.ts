@@ -5,6 +5,9 @@ import { deleteServiceByIdOfInvoice, deleteInvoiceByID } from "~~/server/control
 export default defineEventHandler(async (event) => {
     try {
         console.log('Delete invoice endpoint called')
+        console.log('Request method:', event.node.req.method)
+        console.log('Request headers:', event.node.req.headers)
+        console.log('Request URL:', event.node.req.url)
 
         // Add timeout to the entire operation
         const timeoutPromise = new Promise((_, reject) => {
@@ -26,21 +29,29 @@ export default defineEventHandler(async (event) => {
                 const readBodyPromise = readBody(event);
                 const body = await Promise.race([readBodyPromise, readBodyTimeout]);
                 console.log('Body read successfully:', body)
+                console.log('Body type:', typeof body)
+                console.log('Body keys:', Object.keys(body || {}))
 
-                invoice_id = body.invoice_id;
+                invoice_id = await body?.invoice_id;
                 console.log('Invoice ID extracted from body:', invoice_id)
+                console.log('Invoice ID type:', typeof invoice_id)
             } catch (bodyError) {
                 console.log('Failed to read body, trying query params:', bodyError)
                 
                 // Fallback to query parameters
                 try {
                     const query = getQuery(event);
+                    console.log('Query params:', query)
                     invoice_id = query.invoice_id;
                     console.log('Invoice ID extracted from query:', invoice_id)
                 } catch (queryError) {
                     console.log('Failed to read query params:', queryError)
                 }
             }
+
+            console.log('Final invoice_id value:', invoice_id)
+            console.log('Final invoice_id type:', typeof invoice_id)
+            console.log('Final invoice_id truthy:', !!invoice_id)
 
             if (!invoice_id) {
                 console.log('No invoice_id provided in body or query')
