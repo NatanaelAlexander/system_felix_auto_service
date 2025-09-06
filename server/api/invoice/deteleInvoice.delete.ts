@@ -4,7 +4,9 @@ import { deleteServiceByIdOfInvoice, deleteInvoiceByID } from "~~/server/control
 
 export default defineEventHandler(async (event) => {
     try {
+        console.log('Delete endpoint called')
         const body = await readBody(event);
+        console.log('Body received:', body)
         const invoice_id = body?.invoice_id;
         
         if (!invoice_id) {

@@ -283,8 +283,8 @@ const deleteInvoice = async () => {
     const config = useRuntimeConfig()
     const url = config.public.apiBase
     
-    const response = await fetch(`${url}/api/invoice/deteleInvoice`, {
-      method: 'DELETE',
+    const response = await fetch(`${url}/api/invoice/deleteAInvoice`, {
+      method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
@@ -293,6 +293,19 @@ const deleteInvoice = async () => {
         invoice_id: props.invoiceData.id
       })
     })
+    
+    // Check if response is ok
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`)
+    }
+    
+    // Check if response is JSON
+    const contentType = response.headers.get('content-type')
+    if (!contentType || !contentType.includes('application/json')) {
+      const text = await response.text()
+      console.error('Non-JSON response:', text)
+      throw new Error('Server returned non-JSON response')
+    }
     
     const data = await response.json()
     
