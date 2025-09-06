@@ -283,25 +283,29 @@ const deleteInvoice = async () => {
     const config = useRuntimeConfig()
     const url = config.public.apiBase
     
-    const response = await axios.delete(`${url}/api/invoice/deteleInvoice`, {
-      data: {
-        invoice_id: props.invoiceData.id
+    const response = await fetch(`${url}/api/invoice/deteleInvoice`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
       },
-      withCredentials: true // Include cookies for authentication
+      credentials: 'include', // Include cookies for authentication
+      body: JSON.stringify({
+        invoice_id: props.invoiceData.id
+      })
     })
     
-    console.log('Delete response:', response.data)
+    const data = await response.json()
     
-    if (response.data.message === 'delete success') {
+    if (data.message === 'delete success') {
       emit('invoice-deleted')
       closeModal()
     } else {
-      throw new Error(response.data.message || 'Failed to delete invoice')
+      throw new Error(data.message || 'Failed to delete invoice')
     }
     
   } catch (error) {
     console.error('Error deleting invoice:', error)
-    alert(error.response?.data?.message || error.message || 'Failed to delete invoice')
+    alert(error.message || 'Failed to delete invoice')
   } finally {
     isDeleting.value = false
   }
